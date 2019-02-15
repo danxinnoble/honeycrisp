@@ -1,28 +1,191 @@
 
+#class Ring(object):
+
+  # Defines parameters for the ring Z/pZ/<X^n + 1>
+  # i.e. A ring of polynomials where coefficients are
+  #   in Z/pZ, and where polynomial multiplication is 
+  #   reduced over X^n+1
+  # p is the prime modulus natively used by SPDZ
+  # Require also that p = 1 (mod 2n)
+  # n = 2^nBitsN
+  # w is a 2nth primitive root of unity
+  # All are public (non-secret) values
+#  def __init__(self, n, nBitsN, w):
+#    self.n = n
+#    self.nBitsN = nBitsN
+#    self.w = w
+#    return
+
+  # Return a random element in [0, p)
+#  def randElem(self):
+#    return sint.get_random_triple()[0]
+
+  # Returns 0 or 1 each with chance 0.5
+#  def randBit(self):
+#    b = sint.get_random_int(1)
+#    return b
+
+  # Selects r from (X~B(2n, 0.5) - n) mod p
+  # i.e. should be centered at 0
+#  def modBinom(self, n):
+#    r = sint(0)
+#    for i in range(0, 2*n):
+#      r = r + self.randBit()
+#    return r - n
+
+
+# RING OPERATIONS
+# These operations are performed in a ring Z/pZ/<x^n + 1>
+# Here p is the modulus used by SPDZ
+# It is assumed that n = len(a) = len(b).
+
+# Ring addition (i.e. pointwise vector addition mod p)
 def ringAdd(a, b):
-  res = sint.Array(len(a))
+  res = []
   for i in range(0, len(a)):
-    res[i] = a[i] + b[i]
+    res.append(a[i] + b[i])
   return res
 
+# Ring subtraction (i.e. pointwise vector subtraction mod p)
+def ringSub(a, b):
+  res = []
+  for i in range(0, len(a)):
+    res.append(a[i] - b[i])
+  return res
 
-a = sint.Array(5)
+# Ring multiplication (i.e. convolution)
+# Polynomials are represented with lowest powers first
+#   e.g. (1 + 2x + 3x^2) is represented as [1, 2, 3]
+# Reduce polynomial modulo x^(len(a)) + 1
+def ringMul(a, b):
+  conv = []
+  for i in range(len(a) + len(b)):
+    conv.append(sint(0))
+  for i in range(0, len(a)):
+    for j in range(0, len(b)):
+      conv[i+j] = conv[i+j] + ( a[i] * b[j] )
+
+  res = []
+  for i in range(len(a)-1):
+    res.append(conv[i] - conv[i+len(a)])
+  res.append(conv[len(a) - 1])
+  return res
+
+# Fast Ring multiplication
+# From Bernstein, Daniel. "Fast multiplication and its applications." 
+# See https://cr.yp.to/papers.html#multapps
+# a, b: operands (elements of Z/pZ/<X^n + 1>
+# n : length of polynomials
+# For this to work, need len(a) = len(b) = n = 2^nBitsN
+# Note that this uses operations NATIVELY in the SCALE-MAMBA field.
+# Let p be the modulus used by SCALE-MAMBA
+# We require: p = 1 (mod 2n), w^n = -1 (mod p)
+def ringMulFast(a, b, nBitsN, w):
+  n = 1 << nBitsN
+  nProd = ringMulFastRec(a, b, n, nBitsN-1, n/2, n, w)  
+  res = []
+  for i in range(0, n):
+    res.append(nProd[i] / n)
+  return res 
+ 
+# Return a * b
+# n = 2^nBitsN = len(a) = len(b)
+def ringMulFastRec(a, b, n, nBitsN, wExp, bign, w): 
+  res = []
+  if n == 1:
+    res.append(a[0] * b[0])
+    return res
+    
+  c = w ** (wExp)
+ 
+  aSplitAdd = []
+  aSplitSub = []
+  for i in range(0, n/2):
+    t = a[i + n/2] * c
+    aSplitAdd.append(a[i] + t)
+    aSplitSub.append(a[i] - t)
+
+  bSplitAdd = []
+  bSplitSub = []
+  for i in range(0, n/2):
+    t = b[i + n/2] * c
+    bSplitAdd.append(b[i] + t)
+    bSplitSub.append(b[i] - t)
+
+  resAdd = ringMulFastRec(aSplitAdd, bSplitAdd, n/2, nBitsN - 1, wExp/2, bign, w)
+  resSub = ringMulFastRec(aSplitSub, bSplitSub, n/2, nBitsN - 1, wExp/2 + bign/2, bign, w)
+
+  for i in range(0, n/2):
+    t = resAdd[i] + resSub[i]
+    res.append(t)
+  for i in range(0, n/2):
+    t = resAdd[i] - resSub[i]
+    res.append(t/c)
+     
+  return res
+
+  # Random ring element
+  # Returns a vector of length len 
+  # Each item is chosen uniformally at random from [0, p)
+  def ringRand(self, n):
+    res = []
+    for i in range(0, n):
+      res.append(self.randElem())
+    return res
+
+  # Returns a vector of length len 
+  # Each item is chosen independently at random from (B(2n, 0.5) - n) mod p
+  def ringBinom(self, len, n):
+    res = []
+    for i in range(0, len):
+      res.append(self.modBinom(n))
+    return res
+
+  def ringRevealPrettyPrint(self, a):
+    print_ln("[ ")
+    for i in range(0, len(a)):
+      print_ln("%s ", a[i].reveal())
+    print_ln("]")
+    return
+
+
+  # a is a ring element
+  def ringRevealToParty(self, a, partyNum):
+    for i in range(0, len(a)):
+      a[i].reveal_to(partyNum)
+
+
+  def ringReadFromFile(self, fileName):
+    f = open(fileName, "r")
+    a = []
+    for line in f:
+      if (line[0] != '[') and (line[0] != ']'):
+        x = int(line)
+        a.append(cint(x))
+    return a
+
+  def readFromPrivateInput(self, partyNum):
+    res = []
+    n = self.n
+    for i in range(0, n):
+      res.append(sint.get_raw_input_from(partyNum))
+    return res
+
+a = sint.Array(4)
 a[0] = sint(12)
-a[1] = sint(5)
-a[2] = sint(19)
-a[3] = sint(-4)
-a[4] = sint(95)
+a[1] = sint(15)
+a[2] = sint(4)
+a[3] = sint(7)
 
-b = sint.Array(5)
-b[0] = sint(11)
-b[1] = sint(-5)
-b[2] = sint(-18)
-b[3] = sint(2)
-b[4] = sint(-92)
+b = sint.Array(4)
+b[0] = sint(12)
+b[1] = sint(14)
+b[2] = sint(2)
+b[3] = sint(4)
 
-c = ringAdd(a, b)
+# For use with n=4, p=198766463529478683931867765928436695041
+#w = 99582806073848090994747011657448965175
 
-@for_range(len(a))
-def range_body(i):
-  c[i].reveal_to(0)
-
+c = ringMul(a, b)
+for i in range(0, len(a)):
+  c[i].reveal_to(0) 
