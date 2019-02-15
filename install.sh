@@ -34,9 +34,9 @@ openssl genrsa -out RootCA.key 4096
 openssl req -new -x509 -days 1826 -key RootCA.key \
            -subj $SUBJ -out RootCA.crt
 
-# make 4 certificates. More can be added as necessary
+# make 40 certificates. More can be added as necessary
 mkdir csr
-for ID in {0..3}
+for ID in {0..39}
 do
   SUBJ="/CN=player$ID@example.com"
   openssl genrsa -out Player$ID.key 2048
