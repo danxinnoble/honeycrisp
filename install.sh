@@ -48,7 +48,7 @@ done
 
 # copy examples to correct locations
 cd /root/SCALE-MAMBA
-for EX in mult3 innerprod xtabs
+for EX in mult3 innerprod xtabs keygen
 do
   mkdir Programs/$EX
   cp /root/source/$EX.mpc Programs/$EX/

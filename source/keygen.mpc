@@ -1,0 +1,28 @@
+
+def ringAdd(a, b):
+  res = sint.Array(len(a))
+  for i in range(0, len(a)):
+    res[i] = a[i] + b[i]
+  return res
+
+
+a = sint.Array(5)
+a[0] = sint(12)
+a[1] = sint(5)
+a[2] = sint(19)
+a[3] = sint(-4)
+a[4] = sint(95)
+
+b = sint.Array(5)
+b[0] = sint(11)
+b[1] = sint(-5)
+b[2] = sint(-18)
+b[3] = sint(2)
+b[4] = sint(-92)
+
+c = ringAdd(a, b)
+
+@for_range(len(a))
+def range_body(i):
+  c[i].reveal_to(0)
+
