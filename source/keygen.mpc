@@ -172,20 +172,20 @@ def ringMulFastRec(a, b, n, nBitsN, wExp, bign, w):
     return res
 
 a = sint.Array(4)
-a[0] = sint(12)
-a[1] = sint(15)
-a[2] = sint(4)
-a[3] = sint(7)
+a[0] = sint(1)
+a[1] = sint(2)
+a[2] = sint(3)
+a[3] = sint(4)
 
 b = sint.Array(4)
-b[0] = sint(12)
-b[1] = sint(14)
-b[2] = sint(2)
+b[0] = sint(1)
+b[1] = sint(2)
+b[2] = sint(3)
 b[3] = sint(4)
 
 # For use with n=4, p=198766463529478683931867765928436695041
-#w = 99582806073848090994747011657448965175
+w = cint(99582806073848090994747011657448965175)
 
-c = ringMul(a, b)
+c = ringMulFast(a, b, 2, w)
 for i in range(0, len(a)):
   c[i].reveal_to(0) 
