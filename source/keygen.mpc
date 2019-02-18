@@ -19,6 +19,10 @@ class Ring(object):
   def randElem(self):
     return sint.get_random_triple()[0]
 
+  # Return a random cint in [0, p)
+  def randElemClear(self):
+    return self.randElem().reveal()
+
   # Returns 0 or 1 each with chance 0.5
   def randBit(self):
     b = sint.get_random_int(1)
@@ -134,6 +138,13 @@ class Ring(object):
       res.append(self.randElem())
     return res
 
+  def ringRandClear(self):
+    n = self.n
+    res = []
+    for i in range(0, n):
+      res.append(self.randElemClear())
+    return res
+
   # Returns a vector of length n 
   # Each item is chosen independently at random from (B(2N, 0.5) - N) mod p
   def ringBinom(self, N):
@@ -195,7 +206,7 @@ class LWE(object):
   def key_gen(self):
     r = self.r
     N = self.N
-    a = r.ringRand()
+    a = r.ringRandClear()
     s = r.ringBinom(N)
     e = r.ringBinom(N)
     b = r.ringAdd(r.ringMulFast(a, s), e)
@@ -228,7 +239,13 @@ class LWE(object):
     v = r.ringAdd(v, e2)
     v = r.ringAdd(v, zMthP)
 
-    res = [u, v]
+    uClear = []
+    vClear = []
+    for i in range(0, len(u)):
+      uClear.append(u[i].reveal())
+      vClear.append(v[i].reveal())
+
+    res = [uClear, vClear]
     return res
 
 
