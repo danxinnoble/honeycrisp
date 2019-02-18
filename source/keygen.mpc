@@ -161,6 +161,12 @@ class Ring(object):
     print_ln("]")
     return
 
+  def reveal(self, a):
+    n = self.n
+    aClear = []
+    for i in range(0, n):
+      aClear.append(a[i].reveal())
+    return aClear
 
   # a is a ring element
   def ringRevealToParty(self, a, partyNum):
@@ -209,7 +215,7 @@ class LWE(object):
     a = r.ringRandClear()
     s = r.ringBinom(N)
     e = r.ringBinom(N)
-    b = r.ringAdd(r.ringMulFast(a, s), e)
+    b = r.reveal(r.ringAdd(r.ringMulFast(a, s), e))
 
     res = [a, b, s]
     return res
@@ -239,13 +245,7 @@ class LWE(object):
     v = r.ringAdd(v, e2)
     v = r.ringAdd(v, zMthP)
 
-    uClear = []
-    vClear = []
-    for i in range(0, len(u)):
-      uClear.append(u[i].reveal())
-      vClear.append(v[i].reveal())
-
-    res = [uClear, vClear]
+    res = [r.reveal(u), r.reveal(v)]
     return res
 
 
