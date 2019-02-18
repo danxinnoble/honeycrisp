@@ -4,7 +4,7 @@ class Ring(object):
   # i.e. A ring of polynomials where coefficients are
   #   in Z/pZ, and where polynomial multiplication is 
   #   reduced over X^n+1
-  # p is the prime modulus natively used by SPDZ
+  # p is the prime modulus natively used by SCALE-MAMBA
   # Require also that p = 1 (mod 2n)
   # n = 2^nBitsN
   # w is a 2nth primitive root of unity
@@ -35,7 +35,7 @@ class Ring(object):
 
   # RING OPERATIONS
   # These operations are performed in a ring Z/pZ/<x^n + 1>
-  # Here p is the modulus used by SPDZ
+  # Here p is the modulus used by SCALE-MAMBA
   # It is assumed that n = len(a) = len(b).
 
   # Ring addition (i.e. pointwise vector addition mod p)
@@ -173,24 +173,108 @@ class Ring(object):
 
 
 
+# File ring.py must be placed in ./Compiler/
+#from ring import Ring
+#from Compiler.library import *
 
-a = sint.Array(4)
-a[0] = sint(1)
-a[1] = sint(2)
-a[2] = sint(3)
-a[3] = sint(4)
+class LWE(object):
 
-b = sint.Array(4)
-b[0] = sint(1)
-b[1] = sint(2)
-b[2] = sint(3)
-b[3] = sint(4)
+  # In order for decryption to work,
+  #   N and m=2^lgM must be chosen appropriately.
+  # Namely, if you wish to do t ciphertext additions
+  #   and p is the size of the SCALE-MAMBA field, then need:
+  #   t*2*N^2 < p / (2*m)
+  def __init__(self, r, N, lgM):
+    self.r = r  # Ring used
+    self.N = N  # Half-width of binomial distributions
+    # m = Modulus of ciphertext additions
+    # Require p = 1 (mod 2m), and m to be a power of 2
+    self.lgM = lgM
+    self.m = 2 ** lgM
+    return
+
+  # Returns [a, b, s]
+  # (a, b) is the public key, s is the secret key
+  def key_gen(self, len):
+    r = self.r
+    N = self.N
+    a = r.ringRand(len)
+    s = r.ringBinom(len, N)
+    e = r.ringBinom(len, N)
+    b = r.ringAdd(r.ringMulFast(a, s), e)
+
+    res = [a, b, s]
+    return res
+
+  # z is plaintext as bit-array
+  # returns ciphertext [u, v]
+  def enc(self, a, b, z):
+    r = self.r
+    N = self.N
+    m = self.m
+    e0 = r.ringBinom(len(z), N)
+    e1 = r.ringBinom(len(z), N)
+    e2 = r.ringBinom(len(z), N)
+
+    # u = a*e0 + e1 (mod q)
+    u = r.ringMulFast(a, e0)
+    u = r.ringAdd(u, e1)
+ 
+    # v = b*e0 + e2 + round(p/m)z (mod p) 
+    mthP = cint(-1)/cint(m)
+    zMthP = []
+
+    for i in range(0, len(z)):
+      zMthP.append(z[i] * mthP)
+  
+    v = r.ringMulFast(b, e0)
+    v = r.ringAdd(v, e2)
+    v = r.ringAdd(v, zMthP)
+
+    res = []
+    res.append(u)
+    res.append(v)
+
+    return res
+
+
+  def dec(self, u, v, s):
+    r = self.r
+    m = self.m
+    lgM = self.lgM
+    zNoisy = r.ringSub(v, r.ringMulFast(u, s))
+    halfMthP = cint(-1)/(2*m)
+    z = []
+    for i in range(0, len(zNoisy)):
+      zRangeI = zNoisy[i] + halfMthP
+      z.append( (m - (zRangeI * cint(m)) % (1 << lgM)) % (1 << lgM) ) 
+
+    return z
+
+
+
+
+x = sint.Array(4)
+x[0] = sint(1)
+x[1] = sint(2)
+x[2] = sint(3)
+x[3] = sint(4)
 
 # For use with n=4, p=198766463529478683931867765928436695041
 w = cint(99582806073848090994747011657448965175)
 
 r = Ring(4, 2, w)
 
-c = r.ringMulFast(a, b)
+lwe = LWE(r, 1, 5)
+
+[a, b, s] = lwe.key_gen(4)
+
+uv = lwe.enc(a, b, x)
+
+u = uv[0]
+v = uv[1]
+
+x2 = lwe.dec(u, v, s)
+
 for i in range(0, len(a)):
-  c[i].reveal_to(0) 
+  x2[i].reveal_to(0) 
