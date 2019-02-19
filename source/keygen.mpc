@@ -251,14 +251,16 @@ class LWE(object):
 
   def dec(self, u, v, s):
     r = self.r
-    m = self.m
     lgM = self.lgM
+    m = 1 << lgM
+    clearM = cint(m)
     zNoisy = r.ringSub(v, r.ringMulFast(u, s))
     halfMthP = cint(-1)/(2*m)
     z = []
     for i in range(0, len(zNoisy)):
       zRangeI = zNoisy[i] + halfMthP
-      z.append( (m - (zRangeI * cint(m)) % (1 << lgM)) % (1 << lgM) ) 
+      zNotchesI = zRangeI * clearM
+      z.append(m - 1 - ((zNotchesI - 1) % m))
 
     return z
 
