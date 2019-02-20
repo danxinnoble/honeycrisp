@@ -17,6 +17,8 @@ RUN apt-get update && apt-get install -y \
   yasm
 
 ADD source/ /root/source
+ADD depends.sh .
+RUN ["bash", "depends.sh"]
 ADD install.sh .
 RUN ["bash", "install.sh"]
 
