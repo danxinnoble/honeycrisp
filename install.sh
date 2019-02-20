@@ -58,7 +58,7 @@ mv /root/source/SetupOptions.conf .
 
 # copy examples to correct locations
 cd /root/SCALE-MAMBA
-for EX in mult3 innerprod xtabs keygen
+for EX in keygen
 do
   mkdir Programs/$EX
   cp /root/source/$EX.mpc Programs/$EX/
