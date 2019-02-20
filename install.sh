@@ -23,7 +23,12 @@ ldconfig
 cd 
 git clone https://github.com/KULeuven-COSIC/SCALE-MAMBA.git
 cd SCALE-MAMBA
+git checkout -b v1.2 3722a85
 mv /root/source/CONFIG.mine .
+mv /root/source/Player.cpp ./src/
+mv /root/source/IO.h ./src/Input_Output/
+mv /root/source/Input_Output_File.cpp ./src/Input_Output/
+mv /root/source/Input_Output_File.h ./src/Input_Output/
 make progs
 
 # set up certificate authority
@@ -46,13 +51,18 @@ do
     -in csr/Player$ID.csr -out Player$ID.crt 
 done
 
+# Set up SCALE-MAMBA
+cd /root/SCALE-MAMBA
+mv /root/source/SetupOptions.conf .
+./Setup.x < SetupOptions.conf
+
 # copy examples to correct locations
 cd /root/SCALE-MAMBA
 for EX in mult3 innerprod xtabs keygen
 do
   mkdir Programs/$EX
   cp /root/source/$EX.mpc Programs/$EX/
-done
+done 
 
 # add simple syntax highlighting
 cd
