@@ -267,22 +267,20 @@ class LWE(object):
 
 
 
-x = sint.Array(4)
-x[0] = sint(1)
-x[1] = sint(2)
-x[2] = sint(3)
-x[3] = sint(4)
+# For use with n=512, p=189583706107733020306301399600864428033
+w = cint(12174264428641841816071172915275825606)**16
 
-# For use with n=4, p=198766463529478683931867765928436695041
-w = cint(99582806073848090994747011657448965175)
-
-n=4
-lgN = 2
+n=512
+lgN = 9
 r = Ring(lgN, w)
 
 N = 1
-lgM = 5
+lgM = 50
 lwe = LWE(r, N, lgM)
+
+x = sint.Array(n)
+for i in range(0, len(x)):
+  x[i] = sint(i)
 
 [a, b, s] = lwe.key_gen()
 
@@ -290,5 +288,5 @@ lwe = LWE(r, N, lgM)
 
 x2 = lwe.dec(u, v, s)
 
-for i in range(0, len(a)):
-  x2[i].reveal_to(0) 
+for i in range(0, 4):
+  output_shares(1000, x2[i]) 
