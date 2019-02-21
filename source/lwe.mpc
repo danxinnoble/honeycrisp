@@ -265,28 +265,3 @@ class LWE(object):
     return z
 
 
-
-
-# For use with n=512, p=189583706107733020306301399600864428033
-w = cint(12174264428641841816071172915275825606)**16
-
-n=512
-lgN = 9
-r = Ring(lgN, w)
-
-N = 1
-lgM = 50
-lwe = LWE(r, N, lgM)
-
-x = sint.Array(n)
-for i in range(0, len(x)):
-  x[i] = sint(i)
-
-[a, b, s] = lwe.key_gen()
-
-[u, v] = lwe.enc(a, b, x)
-
-x2 = lwe.dec(u, v, s)
-
-for i in range(0, 4):
-  output_shares(1000, x2[i]) 
