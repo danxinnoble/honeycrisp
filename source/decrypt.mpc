@@ -1,0 +1,83 @@
+from Compiler.util import log2
+from ring import Ring
+from LWE import LWE
+
+# Number of committee members (full protocol has k+1 users)
+k = 19
+
+n = 2048
+nBitsN = 11
+N_ = 1 # Half-width of binomial distribution
+lgM = 15
+ 
+# w is chosen so that w^n = -1 (mod p) 
+# where p is the size of the prime field
+w2048 = cint(1662636632232769309036)
+r = Ring(n, nBitsN, w2048)
+
+lwe = LWE(r, N_, lgM) 
+
+# Length of messages
+N = n
+
+def norm(z):
+	mag = sint(0)
+	for i in range(len(z)):
+		mag += z[i]**2
+	return mag
+
+def encrypt(a, b, n):
+	[u, v] = lwe.enc(a,b,n)
+	return u
+
+def decrypt(enc_u, enc_v, s):
+	return lwe.dec(enc_u, enc_v, s)
+
+
+# Noises encryption with noise provided from k committee members, decrypts
+# by using shares of secret key, and compares to threshold.
+# Returns message if sufficiently far from delta, otherwise returns null.
+def noiseDecryptAndThreshold(enc_u, enc_v, secret_key_shares, noise,  T, delta):
+
+	total_noise = Array(N, sint)
+	s = Array(N, sint)
+
+	for i in range(0, k):
+		for j in range(N):
+			# Reconstruct secret key
+			s[j] += secret_key_shares[i][j]
+			
+			# Take all users' noise and sum up homomorphically
+			total_noise[j] += noise[i][j]	
+
+	z = decrypt(enc_u, enc_v, s)
+	mag = norm(z)
+	if (abs(mag - T) < delta):
+		print_ln("0")
+	else:
+		print_ln("Text is %s", z.reveal_to[k]);
+
+
+# Get array of secret key shares and noise from each committee member
+secret_key_shares = Matrix(k, N, sint)
+noise = Matrix(k, N, sint)
+for i in range(k):
+	for j in range(N):
+		secret_key_shares[i][j] = sint.get_raw_input_from(i)
+		noise[i][j] = sint.get_raw_input_from(i)
+
+
+
+
+# Public key not needed??
+# a = [sint.get_raw_input_from(k) for i in range(N)]
+# b = [sint.get_raw_input_from(k) for i in range(N)]
+
+
+# A provides encrypted aggregate data, threshold
+enc_u = [sint.get_raw_input_from(k) for i in range(N)]
+enc_v = [sint.get_raw_input_from(k) for i in range(N)]
+T = sint.get_raw_input_from(k)
+delta = sint.get_raw_input_from(k)
+
+noiseDecryptAndThreshold(enc_u, enc_v, secret_key_shares, noise, T, delta)
