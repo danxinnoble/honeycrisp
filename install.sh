@@ -37,7 +37,7 @@ mv /root/source/SetupOptions.conf .
 
 # copy examples to correct locations
 cd /root/SCALE-MAMBA
-for EX in lwe lwe_test decrypt
+for EX in ring lwe lwe_test decrypt
 do
   mkdir Programs/$EX
   cp /root/source/$EX.mpc Programs/$EX/

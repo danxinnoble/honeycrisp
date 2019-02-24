@@ -8,7 +8,7 @@ lgN = 9
 r = Ring(lgN, w)
 
 N = 1
-lgM = 50
+lgM = 20
 lwe = LWE(r, N, lgM)
 
 x = sint.Array(n)
