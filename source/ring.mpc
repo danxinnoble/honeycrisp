@@ -142,8 +142,12 @@ class Ring(object):
   def ringRand(self):
     n = self.n
     res = []
-    for i in range(0, n):
-      res.append(self.randElem())
+    for i in range(n/2):
+      r = sint.get_random_triple()
+      res.append(r[0])
+      res.append(r[1])    # r[0] and r[1] are random and independent
+    for i in range(n%2):  # Probably n always even, but just in case.
+      res.append(sint.get_random_triple()[0])
     return res
 
   def ringRandClear(self):
