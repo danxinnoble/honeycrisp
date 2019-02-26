@@ -8,13 +8,14 @@ class LWE(object):
   # Namely, if you wish to do t ciphertext additions
   #   and p is the size of the SCALE-MAMBA field, then need:
   #   t*2*N^2 < p / (2*m)
-  def __init__(self, r, N, lgM):
+  def __init__(self, r, N, lgM, l):
     self.r = r  # Ring used
     self.N = N  # Half-width of binomial distributions
     # m = Modulus of ciphertext additions
     # Require p = 1 (mod 2m), and m to be a power of 2
     self.lgM = lgM
-    self.m = 2 ** lgM
+    self.m = 2 ** lgM    # Plaintext modulus (size per element)
+    self.l = l           # Plaintext length (number of elements)
     return
 
   # Returns [a, b, s]
@@ -30,7 +31,7 @@ class LWE(object):
     res = [a, b, s]
     return res
 
-  # z is plaintext as bit-array
+  # z is plaintext (array) of l elems each modulo m
   # returns ciphertext [u, v]
   def enc(self, a, b, z):
     r = self.r
@@ -46,10 +47,11 @@ class LWE(object):
  
     # v = b*e0 + e2 + round(p/m)z (mod p) 
     mthP = cint(-1)/cint(m)
-    zMthP = []
+
+    zMthP = r.zero()
 
     for i in range(0, len(z)):
-      zMthP.append(z[i] * mthP)
+      zMthP[i] = z[i] * mthP
   
     v = r.ringMulFast(b, e0)
     v = r.ringAdd(v, e2)
@@ -67,7 +69,7 @@ class LWE(object):
     zNoisy = r.ringSub(v, r.ringMulFast(u, s))
     halfMthP = cint(-1)/(2*m)
     z = []
-    for i in range(0, len(zNoisy)):
+    for i in range(0, self.l):
       zRangeI = zNoisy[i] + halfMthP
       zNotchesI = zRangeI * clearM
       z.append(m - 1 - ((zNotchesI - 1) % m))
