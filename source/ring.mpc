@@ -44,16 +44,18 @@ class Ring(object):
 
   # Ring addition (i.e. pointwise vector addition mod p)
   def ringAdd(self, a, b):
-    res = []
-    for i in range(0, len(a)):
-      res.append(a[i] + b[i])
+    res = sint.Array(self.n)
+    @for_range(self.n)
+    def range_body(i):
+      res[i] = a[i] + b[i]
     return res
 
   # Ring subtraction (i.e. pointwise vector subtraction mod p)
   def ringSub(self, a, b):
-    res = []
-    for i in range(0, len(a)):
-      res.append(a[i] - b[i])
+    res = sint.Array(self.n)
+    @for_range(self.n)
+    def range_body(i):
+      res[i] = a[i] - b[i]
     return res
 
   # Ring multiplication (i.e. convolution)
@@ -61,17 +63,24 @@ class Ring(object):
   #   e.g. (1 + 2x + 3x^2) is represented as [1, 2, 3]
   # Reduce polynomial modulo x^(len(a)) + 1
   def ringMul(self, a, b):
-    conv = []
-    for i in range(len(a) + len(b)):
-      conv.append(sint(0))
-    for i in range(0, len(a)):
-      for j in range(0, len(b)):
-        conv[i+j] = conv[i+j] + ( a[i] * b[j] )
+    n = self.n
+    conv = sint.Array(2*n)
+    @for_range(2*n)
+    def range_body_zero(i):
+      conv[i] = sint(0)
+    
+    @for_range(n**2)
+    def range_body_mul(i):
+      j = i % n
+      k = i / n
+      conv[j+k] = conv[j+k] + ( a[j] * b[k] )
 
-    res = []
-    for i in range(len(a)-1):
-      res.append(conv[i] - conv[i+len(a)])
-    res.append(conv[len(a) - 1])
+    res = sint.Array(n)
+    @for_range(n-1)
+    def range_body_wrap(i):
+      res[i] = conv[i] - conv[i + n]
+    
+    res[n-1] = conv[n-1]
     return res
 
   # Fast Ring multiplication
@@ -87,6 +96,7 @@ class Ring(object):
     n = self.n
     nBitsN = self.nBitsN
     nProd = self.ringMulFastRec(a, b, n, nBitsN-1, n/2)  
+    res = sint.Array(n)
     res = []
     for i in range(0, n):
       res.append(nProd[i] / n)
@@ -118,7 +128,7 @@ class Ring(object):
 
     resAdd = self.ringMulFastRec(aSplitAdd, bSplitAdd, n/2, nBitsN - 1, wExp/2)
     resSub = self.ringMulFastRec(aSplitSub, bSplitSub, n/2, nBitsN - 1, wExp/2 + self.n/2)
-  
+
     for i in range(0, n/2):
       t = resAdd[i] + resSub[i]
       res.append(t)
@@ -131,39 +141,42 @@ class Ring(object):
   # Returns 0:
   def zero(self):
     n = self.n
-    zero = []
-    for i in range(n):
-      zero.append(sint(0))
+    zero = sint.Array(n)
+
+    @for_range(n)
+    def range_body(i):
+      zero[i] = sint(0)
+
     return zero
 
   # Random ring element
   # Returns a vector of length n 
   # Each item is chosen uniformally at random from [0, p)
+  # Assumes n is even
   def ringRand(self):
     n = self.n
-    res = []
-    for i in range(n/2):
+    res = sint.Array(n)
+    @for_range(n/2)
+    def range_body(i):
       r = sint.get_random_triple()
-      res.append(r[0])
-      res.append(r[1])    # r[0] and r[1] are random and independent
-    for i in range(n%2):  # Probably n always even, but just in case.
-      res.append(sint.get_random_triple()[0])
+      res[2*i] = r[0]
+      res[2*i+1] = r[1]   # r[0] and r[1] are random and independent
     return res
 
+  # Assumes n is even
   def ringRandClear(self):
-    n = self.n
-    res = []
-    for i in range(0, n):
-      res.append(self.randElemClear())
+    rand = self.ringRand()
+    res = self.reveal(rand)
     return res
 
   # Returns a vector of length n 
   # Each item is chosen independently at random from (B(2N, 0.5) - N) mod p
   def ringBinom(self, N):
     n = self.n
-    res = []
-    for i in range(0, n):
-      res.append(self.modBinom(N))
+    res = sint.Array(n)
+    @for_range(n)
+    def range_body(i):
+      res[i] = self.modBinom(N)
     return res
 
   def ringRevealPrettyPrint(self, a):
@@ -175,9 +188,10 @@ class Ring(object):
 
   def reveal(self, a):
     n = self.n
-    aClear = []
-    for i in range(0, n):
-      aClear.append(a[i].reveal())
+    aClear = cint.Array(n)
+    @for_range(n)
+    def range_body(i):
+      aClear[i] = a[i].reveal()
     return aClear
 
   # a is a ring element
