@@ -128,6 +128,14 @@ class Ring(object):
      
     return res
 
+  # Returns 0:
+  def zero(self):
+    n = self.n
+    zero = []
+    for i in range(n):
+      zero.append(sint(0))
+    return zero
+
   # Random ring element
   # Returns a vector of length n 
   # Each item is chosen uniformally at random from [0, p)
@@ -190,103 +198,3 @@ class Ring(object):
       res.append(sint.get_raw_input_from(partyNum))
     return res
 
-
-class LWE(object):
-
-  # In order for decryption to work,
-  #   N and m=2^lgM must be chosen appropriately.
-  # Namely, if you wish to do t ciphertext additions
-  #   and p is the size of the SCALE-MAMBA field, then need:
-  #   t*2*N^2 < p / (2*m)
-  def __init__(self, r, N, lgM):
-    self.r = r  # Ring used
-    self.N = N  # Half-width of binomial distributions
-    # m = Modulus of ciphertext additions
-    # Require p = 1 (mod 2m), and m to be a power of 2
-    self.lgM = lgM
-    self.m = 2 ** lgM
-    return
-
-  # Returns [a, b, s]
-  # (a, b) is the public key, s is the secret key
-  def key_gen(self):
-    r = self.r
-    N = self.N
-    a = r.ringRandClear()
-    s = r.ringBinom(N)
-    e = r.ringBinom(N)
-    b = r.reveal(r.ringAdd(r.ringMulFast(a, s), e))
-
-    res = [a, b, s]
-    return res
-
-  # z is plaintext as bit-array
-  # returns ciphertext [u, v]
-  def enc(self, a, b, z):
-    r = self.r
-    N = self.N
-    m = self.m
-    e0 = r.ringBinom(N)
-    e1 = r.ringBinom(N)
-    e2 = r.ringBinom(N)
-
-    # u = a*e0 + e1 (mod q)
-    u = r.ringMulFast(a, e0)
-    u = r.ringAdd(u, e1)
- 
-    # v = b*e0 + e2 + round(p/m)z (mod p) 
-    mthP = cint(-1)/cint(m)
-    zMthP = []
-
-    for i in range(0, len(z)):
-      zMthP.append(z[i] * mthP)
-  
-    v = r.ringMulFast(b, e0)
-    v = r.ringAdd(v, e2)
-    v = r.ringAdd(v, zMthP)
-
-    res = [r.reveal(u), r.reveal(v)]
-    return res
-
-
-  def dec(self, u, v, s):
-    r = self.r
-    lgM = self.lgM
-    m = 1 << lgM
-    clearM = cint(m)
-    zNoisy = r.ringSub(v, r.ringMulFast(u, s))
-    halfMthP = cint(-1)/(2*m)
-    z = []
-    for i in range(0, len(zNoisy)):
-      zRangeI = zNoisy[i] + halfMthP
-      zNotchesI = zRangeI * clearM
-      z.append(m - 1 - ((zNotchesI - 1) % m))
-
-    return z
-
-
-
-
-# For use with n=512, p=189583706107733020306301399600864428033
-w = cint(12174264428641841816071172915275825606)**16
-
-n=512
-lgN = 9
-r = Ring(lgN, w)
-
-N = 1
-lgM = 50
-lwe = LWE(r, N, lgM)
-
-x = sint.Array(n)
-for i in range(0, len(x)):
-  x[i] = sint(i)
-
-[a, b, s] = lwe.key_gen()
-
-[u, v] = lwe.enc(a, b, x)
-
-x2 = lwe.dec(u, v, s)
-
-for i in range(0, 4):
-  output_shares(1000, x2[i]) 
