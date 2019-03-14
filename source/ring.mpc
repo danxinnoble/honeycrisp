@@ -83,10 +83,50 @@ class Ring(object):
     res[n-1] = conv[n-1]
     return res
 
+  def bitRev(self, j, nBits):
+    s = 0
+    for i in range(nBits):
+      s = s << 1
+      s += j%2
+      j = j >> 1
+    return s
+
+  # compute a ** b where a, b are cints
+  def cPow(self, a, b, nBitsB):
+    p = cint(1)
+    bRev = self.bitRev(b, nBitsB)
+    for i in range(nBitsB):
+      p = p**2
+      p = p + (bRev % 2)*(p * a - p)
+      bRev = bRev >> 1
+    return p
+
+  # Find what wExp would be in the recursion
+  # wExp is defined as follows
+  # wExp(i, nBitsN-1) = n/2
+  # To compute at item at depth d < nBitsN-1, look at row d+1 below it.
+  #   At the row below there will be a sequence of equal values, of value v.
+  #   If i is in the first half of this sequence, wExp(i, d) = v/2
+  #   Otherwise wExp(i, d) = v/2 + n/2
+  # e.g. the matrix wExp(d, i) when n=8:
+  #  1 1 5 5 3 3 7 7
+  #  2 2 2 2 6 6 6 6
+  #  4 4 4 4 4 4 4 4
+  def getWExp(self, d, i):
+    n = self.n
+    nBits = self.nBitsN
+    base = self.bitRev(i, nBits)*2 + 1
+    return (base << d) % n
+
+  # Return x_i, where i = 0 (false) or 1 (true)
+  def mux(self, i, x0, x1):
+    return x0 + i * (x1 - x0)
+
   # Fast Ring multiplication
   # From Bernstein, Daniel. "Fast multiplication and its applications." 
   # See https://cr.yp.to/papers.html#multapps
   # a, b: operands (elements of Z/pZ/<X^n + 1>
+  # a must be a cint array, b must me a sint array
   # n : length of polynomials
   # For this to work, need len(a) = len(b) = n = 2^nBitsN
   # Note that this uses operations NATIVELY in the SCALE-MAMBA field.
@@ -95,47 +135,73 @@ class Ring(object):
   def ringMulFast(self, a, b):
     n = self.n
     nBitsN = self.nBitsN
-    nProd = self.ringMulFastRec(a, b, n, nBitsN-1, n/2)  
-    res = sint.Array(n)
-    res = []
-    for i in range(0, n):
-      res.append(nProd[i] / n)
-    return res 
- 
-  # Return a * b
-  # n = 2^nBitsN = len(a) = len(b)
-  def ringMulFastRec(self, a, b, n, nBitsN, wExp): 
-    res = []
-    if n == 1:
-      res.append(a[0] * b[0])
-      return res
+
+    Rs = sint.Matrix(nBitsN+1, n)
+    As = cint.Matrix(nBitsN+1, n)
+    Bs = sint.Matrix(nBitsN+1, n)
+
+    @for_range(n)
+    def topAB(i):
+      As[0][i] = a[i]
+      Bs[0][i] = b[i]
+
+    @for_range(1, nBitsN+1)
+    def splitRow(k):
+      d = nBitsN - k       # Number of recursions left until base layer
+      gapSize = 1 << d
+      @for_range(n)
+      def splitCell(i):
+        c = self.cPow(self.w, self.getWExp(cint(d), cint(i)), nBitsN)
+        isRight = cint((i >> d) % 2)
+
+	AsUp = As[k-1][i]
+	AsUpL = As[k-1][i-gapSize]
+	AsUpR = As[k-1][i+gapSize]
+
+        AsIfLeft = AsUp + AsUpR * c
+        AsIfRight = AsUpL - AsUp*c
+
+        As[k][i] = self.mux(isRight, AsIfLeft, AsIfRight)
+
+    @for_range(1, nBitsN+1)
+    def splitRow(k):
+      d = nBitsN - k       # Number of recursions left until base layer
+      gapSize = 1 << d
+      @for_range(n)
+      def splitCell(i):
+        c = self.cPow(self.w, self.getWExp(cint(d), cint(i)), nBitsN)
+        isRight = cint(((i >> d) % 2))
+
+	BsUp = Bs[k-1][i]
+	BsUpL = Bs[k-1][i-gapSize]
+	BsUpR = Bs[k-1][i+gapSize]
+
+        BsIfLeft = BsUp + BsUpR * c
+        BsIfRight = BsUpL - BsUp*c
+
+        Bs[k][i] = self.mux(isRight, BsIfLeft, BsIfRight)
     
-    c = self.w ** (wExp)
- 
-    aSplitAdd = []
-    aSplitSub = []
-    for i in range(0, n/2):
-      t = a[i + n/2] * c
-      aSplitAdd.append(a[i] + t)
-      aSplitSub.append(a[i] - t)
+    @for_range(n)
+    def baseRs(i):
+      Rs[nBitsN][i] = As[nBitsN][i] * Bs[nBitsN][i]
 
-    bSplitAdd = []
-    bSplitSub = []
-    for i in range(0, n/2):
-      t = b[i + n/2] * c
-      bSplitAdd.append(b[i] + t)
-      bSplitSub.append(b[i] - t)
+    @for_range(1, nBitsN+1)
+    def combRow(d):
+      k = nBitsN - d
+      gapSize = 1 << (d-1)
+      @for_range(n)
+      def combCell(i):
+        c = self.cPow(self.w, self.getWExp(cint(d-1), cint(i)), nBitsN)
+        isRight = cint((i >> (d-1)) % 2)
+	RsLeft = Rs[k+1][i] + Rs[k+1][i + gapSize]
+        RsRight = (Rs[k+1][i - gapSize] - Rs[k+1][i]) / c
+        Rs[k][i] = self.mux(isRight, RsLeft, RsRight)
 
-    resAdd = self.ringMulFastRec(aSplitAdd, bSplitAdd, n/2, nBitsN - 1, wExp/2)
-    resSub = self.ringMulFastRec(aSplitSub, bSplitSub, n/2, nBitsN - 1, wExp/2 + self.n/2)
+    res = sint.Array(n)
+    @for_range(n)
+    def setRes(i):
+      res[i] = Rs[0][i] / n
 
-    for i in range(0, n/2):
-      t = resAdd[i] + resSub[i]
-      res.append(t)
-    for i in range(0, n/2):
-      t = resAdd[i] - resSub[i]
-      res.append(t/c)
-     
     return res
 
   # Returns 0:

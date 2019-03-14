@@ -26,7 +26,7 @@ class LWE(object):
     a = r.ringRandClear()
     s = r.ringBinom(N)
     e = r.ringBinom(N)
-    b = r.reveal(r.ringAdd(r.ringMul(a, s), e))
+    b = r.reveal(r.ringAdd(r.ringMulFast(a, s), e))
 
     res = [a, b, s]
     return res
@@ -42,7 +42,7 @@ class LWE(object):
     e2 = r.ringBinom(N)
 
     # u = a*e0 + e1 (mod q)
-    u = r.ringMul(a, e0)
+    u = r.ringMulFast(a, e0)
     u = r.ringAdd(u, e1)
  
     # v = b*e0 + e2 + round(p/m)z (mod p) 
@@ -53,7 +53,7 @@ class LWE(object):
     for i in range(0, len(z)):
       zMthP[i] = z[i] * mthP
   
-    v = r.ringMul(b, e0)
+    v = r.ringMulFast(b, e0)
     v = r.ringAdd(v, e2)
     v = r.ringAdd(v, zMthP)
 
@@ -66,7 +66,7 @@ class LWE(object):
     lgM = self.lgM
     m = 1 << lgM
     clearM = cint(m)
-    zNoisy = r.ringSub(v, r.ringMul(u, s))
+    zNoisy = r.ringSub(v, r.ringMulFast(u, s))
     halfMthP = cint(-1)/(2*m)
     z = []
     for i in range(0, self.l):
