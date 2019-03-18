@@ -7,7 +7,7 @@ execfile('/root/SCALE-MAMBA/Programs/lwe/lwe.mpc')
 # Number of committee members (full protocol has k+1 users)
 k = 19
 
-n = 2048
+l = 2048
 nBitsN = 11
 N_ = 1 # Half-width of binomial distribution
 lgM = 15
@@ -17,12 +17,10 @@ lgM = 15
 w2048 = cint(1662636632232769309036)
 r = Ring(nBitsN, w2048)
 
-l = n
-
 lwe = LWE(r, N_, lgM, l) 
 
 # Length of messages
-N = n
+N = l
 
 def norm(z):
 	mag = sint(0)
@@ -79,8 +77,8 @@ for i in range(k):
 
 
 # A provides encrypted aggregate data, threshold
-enc_u = [sint.get_private_input_from(k) for i in range(N)]
-enc_v = [sint.get_private_input_from(k) for i in range(N)]
+enc_u = [cint.public_input(k) for i in range(N)]
+enc_v = [cint.public_input(k) for i in range(N)]
 T = sint.get_private_input_from(k)
 delta = sint.get_private_input_from(k)
 
