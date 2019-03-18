@@ -3,12 +3,12 @@ cd
 git clone https://github.com/KULeuven-COSIC/SCALE-MAMBA.git
 cd SCALE-MAMBA
 git checkout -b v1.2 3722a85
-mv /root/source/CONFIG.mine .
+mv /root/config/CONFIG.mine .
 mv /root/source/Player.cpp ./src/
 mv /root/source/IO.h ./src/Input_Output/
 mv /root/source/Input_Output_File.cpp ./src/Input_Output/
 mv /root/source/Input_Output_File.h ./src/Input_Output/
-mv /root/source/config.h ./src/config.h
+mv /root/config/config.h ./src/config.h
 make progs
 
 # set up certificate authority
@@ -33,7 +33,7 @@ done
 
 # Set up SCALE-MAMBA
 cd /root/SCALE-MAMBA
-mv /root/source/SetupOptions.conf .
+mv /root/config/SetupOptions.conf .
 ./Setup.x < SetupOptions.conf
 
 # copy examples to correct locations
@@ -47,7 +47,7 @@ done
 # add simple syntax highlighting
 cd
 mkdir -p .vim/syntax
-mv source/mamba.vim .vim/syntax
+mv config/mamba.vim .vim/syntax
 mkdir .vim/ftdetect
 cd .vim/ftdetect
 echo "au BufNewFile,BufRead *.wir set filetype=mamba" > mamba.vim
