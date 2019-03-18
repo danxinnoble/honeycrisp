@@ -8,6 +8,7 @@ mv /root/source/Player.cpp ./src/
 mv /root/source/IO.h ./src/Input_Output/
 mv /root/source/Input_Output_File.cpp ./src/Input_Output/
 mv /root/source/Input_Output_File.h ./src/Input_Output/
+mv /root/source/config.h ./src/config.h
 make progs
 
 # set up certificate authority
