@@ -115,11 +115,11 @@ print_ln("---------------------------------------------------")
 print_ln("Test%s: fastMult", testi)
 testi=testi+1
 
-a = sint.Array(4)
-b = cint.Array(4)
+a = cint.Array(4)
+b = sint.Array(4)
 for i in range(4):
-  a[i] = sint(i)
-  b[i] = cint(i)
+  a[i] = cint(i)
+  b[i] = sint(i)
 
 c = r4.ringMulFast(a, b)
 d = r4.ringMul(a, b)
@@ -137,11 +137,11 @@ print_ln("---------------------------------------------------")
 print_ln("Test%s: fastMultMed", testi)
 testi = testi+1
 
-a = sint.Array(n)
-b = cint.Array(n)
+a = cint.Array(n)
+b = sint.Array(n)
 for i in range(n):
-  a[i] = sint(i)
-  b[i] = cint(1)
+  a[i] = cint(i)
+  b[i] = sint(1)
 
 c = r.ringMulFast(a, b)
 
