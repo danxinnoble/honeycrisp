@@ -2,10 +2,17 @@
 
 PROG_NAME=$1
 N_PLAYERS=4
-N_TRIPLES=$2
-N_BITS=$3
 N_SQUARES=0
 
+echo 'Compiling' $PROG_NAME
+reqs=$(./compile.py $PROG_NAME | grep \'triple)
+
+echo $reqs
+
+N_TRIPLES=$(echo $reqs | grep -o \'triple\'\)..\[0-9\]* | grep -o \[0-9\]*)
+N_BITS=$(echo $reqs | grep -o \'bit\'\)..\[0-9\]* | grep -o \[0-9\]*)
+
+echo ''
 echo 'Measuring the runtime and communication cost of' $PROG_NAME
 
 COMM_T0=$(cat /proc/net/dev | grep -o lo..\[0-9\]* | grep -o \[0-9\]*)
