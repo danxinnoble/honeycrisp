@@ -9,6 +9,7 @@ mv /root/source/IO.h ./src/Input_Output/
 mv /root/source/Input_Output_File.cpp ./src/Input_Output/
 mv /root/source/Input_Output_File.h ./src/Input_Output/
 mv /root/config/config.h ./src/config.h
+mv /root/source/benchmark.sh .
 make progs
 
 # set up certificate authority
@@ -33,8 +34,8 @@ done
 
 # Set up SCALE-MAMBA
 cd /root/SCALE-MAMBA
-mv /root/config/SetupOptions.conf .
-./Setup.x < SetupOptions.conf
+mv /root/config/genSetupOptions.sh .
+./genSetupOptions.sh 4 | ./Setup.x  # By default set-up with 4 players
 
 # copy examples to correct locations
 cd /root/SCALE-MAMBA
