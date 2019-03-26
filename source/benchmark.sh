@@ -2,6 +2,7 @@
 
 PROG_NAME=$1
 N_PLAYERS=$2
+N_IO=$3
 
 echo 'Compiling' $PROG_NAME
 reqs=$(./compile.py $PROG_NAME | grep "Program requires:")
@@ -34,10 +35,10 @@ COMM_T0=$(cat /proc/net/dev | grep -o lo..\[0-9\]* | grep -o \[0-9\]*)
 
 for (( i = 0; i <= $(($N_PLAYERS - 2)); i++ ))
 do
-  ./Player.x -max ${N_TRIPLES},${N_SQUARES},${N_BITS} $i $PROG_NAME > /dev/null 2> /dev/null &
+  ./Player.x -max ${N_TRIPLES},${N_SQUARES},${N_BITS} -maxI ${N_IO} $i $PROG_NAME > /dev/null 2> /dev/null &
 done
 
-time (./Player.x -max ${N_TRIPLES},${N_SQUARES},${N_BITS} $(($N_PLAYERS - 1)) $PROG_NAME > /dev/null 2> /dev/null ) 
+time (./Player.x -max ${N_TRIPLES},${N_SQUARES},${N_BITS} -maxI ${N_IO} $(($N_PLAYERS - 1)) $PROG_NAME > /dev/null 2> /dev/null ) 
 
 COMM_T1=$(cat /proc/net/dev | grep -o lo..\[0-9]\* | grep -o \[0-9\]*)
 echo 'Communication Cost (bytes):' $(($COMM_T1 - $COMM_T0))
