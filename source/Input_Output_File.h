@@ -23,6 +23,8 @@ class Input_Output_File : public Input_Output_Base
 {
   istream *fin;
   ostream *fout;
+  istream *fsharein;
+  ostream *fshareout;
 
   bool human; // Only affects share output
 
@@ -33,10 +35,12 @@ public:
     ;
   }
 
-  void init(istream &f_in, ostream &f_out, bool human_type)
+  void init(istream &f_in, ostream &f_out, ifstream &f_sharein, ofstream &f_shareout, bool human_type)
   {
     fin = &f_in;
     fout = &f_out;
+    fsharein = &f_sharein;
+    fshareout = &f_shareout;
     human= human_type;
   }
 

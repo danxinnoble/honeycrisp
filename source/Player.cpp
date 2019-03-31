@@ -370,8 +370,12 @@ int main(int argc, const char *argv[])
   fin.open("Data/Player" + std::to_string(my_number) + "_in.txt");
   ofstream fout;
   fout.open("Data/Player" + std::to_string(my_number) + "_out.txt", ios_base::app);
+  ifstream fsharein;
+  fsharein.open("Data/Player" + std::to_string(my_number) + "_sharein.txt");
+  ofstream fshareout;
+  fshareout.open("Data/Player" + std::to_string(my_number) + "_shareout.txt");
 
-  io->init(fin, fout, true);
+  io->init(fin, fout, fsharein, fshareout, true);
   machine.Setup_IO(std::move(io));
 
   // Load the initial tapes for the first program into the schedule

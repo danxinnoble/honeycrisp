@@ -75,15 +75,13 @@ void Input_Output_File::public_output_int(const long output, unsigned int channe
 
 void Input_Output_File::output_share(const Share &S, unsigned int channel)
 {
-  (*fout) << "Output channel " << channel << " : ";
-  S.output(*fout, human);
+  S.output(*fshareout, human);
 }
 
 Share Input_Output_File::input_share(unsigned int channel)
 {
-  cout << "Enter value on channel " << channel << " : ";
   Share S;
-  S.input(*fin, human);
+  S.input(*fsharein, human);
   return S;
 }
 

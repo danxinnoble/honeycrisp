@@ -1,6 +1,7 @@
 #!/bin/bash
 
 N_PLAYERS=$1
+THRESHOLD=$2  # Require 2*THRESHOLD < N_PLAYERS
 
 echo 3
 echo RootCA
@@ -17,5 +18,5 @@ echo N
 echo 2
 echo 300424569129657234489620267994584186881
 
-echo $((($N_PLAYERS - 1)/2))
+echo $THRESHOLD
 echo
