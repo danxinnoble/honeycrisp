@@ -7,8 +7,8 @@ execfile('/root/SCALE-MAMBA/Programs/lwe/lwe.mpc')
 # Number of committee members (full protocol has k+1 users)
 k = 19
 
-l = 2048
-nBitsN = 11
+l = 10
+nBitsN = 13
 N_ = 1 # Half-width of binomial distribution
 lgM = 15
  
@@ -20,7 +20,7 @@ r = Ring(nBitsN, w2048)
 lwe = LWE(r, N_, lgM, l) 
 
 # Length of messages
-N = l
+N = 8192
 
 def norm(z):
 	mag = sint(0)
@@ -35,49 +35,7 @@ def encrypt(a, b, n):
 def decrypt(enc_u, enc_v, s):
 	return lwe.dec(enc_u, enc_v, s)
 
-
-# Noises encryption with noise provided from k committee members, decrypts
-# by using shares of secret key, and compares to threshold.
-# Returns message if sufficiently far from delta, otherwise returns null.
-def noiseDecryptAndThreshold(enc_u, enc_v, secret_key_shares, noise,  T, delta):
-
-	#total_noise = Array(N, sint)
-	#s = Array(N, sint)
-
-	#for i in range(0, k):
-	#	for j in range(N):
-			# Reconstruct secret key
-	#		s[j] += secret_key_shares[i][j]
-			
-			# Take all users' noise and sum up homomorphically
-	#		total_noise[j] += noise[i][j]
-			#use sint.get_random_bit()
-
-
-
-	s = sint.Array(N)
-	input_shares(0, *s)
-
-
-	z = decrypt(enc_u, enc_v, s)
-	mag = norm(z)
-	if (mpc_math.abs_fx(mag - T) < delta):
-		print_ln("0")
-	else:
-		print_ln("Text is %s", z.reveal_to[k]);
-
-
-# Get array of secret key shares and noise from each committee member
-secret_key_shares = Matrix(k, N, sint)
-noise = Matrix(k, N, sint)
-for i in range(k):
-	for j in range(N):
-		secret_key_shares[i][j] = sint.get_private_input_from(i)
-		noise[i][j] = sint.get_private_input_from(i)
-
-
-
-
+	
 # Public key not needed??
 # a = [sint.get_private_input_from(k) for i in range(N)]
 # b = [sint.get_private_input_from(k) for i in range(N)]
@@ -89,14 +47,30 @@ enc_v = cint.Array(N)
 
 @for_range(N)
 def set_U(i):
-  enc_u[i] = cint.public_input(k)
+  enc_u[i] = cint.public_input(k) + sint.get_random_bit().reveal()
 
 @for_range(N)
 def set_V(i):
-  enc_v[i] = cint.public_input(k)  
+  enc_v[i] = cint.public_input(k) + sint.get_random_bit().reveal()
 
 
 T = sint.get_private_input_from(k)
 delta = sint.get_private_input_from(k)
 
-noiseDecryptAndThreshold(enc_u, enc_v, secret_key_shares, noise, T, delta)
+s = sint.Array(N)
+#for i in range(N):
+@for_range(N)
+def copy(i):
+	tmp = [sint()]
+	input_shares(0, *tmp)
+	s[i] = tmp[0]
+
+# Noises encryption, decrypts by using shares of secret key, and compares to threshold.
+z = decrypt(enc_u, enc_v, s)
+mag = norm(z)
+
+# Returns message if sufficiently far from delta, otherwise returns null.
+if (mpc_math.abs_fx(mag - T) < delta):
+	print_ln("0")
+else:
+	print_ln("Text is %s", z.reveal_to[k]);
