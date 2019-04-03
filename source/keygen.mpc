@@ -7,13 +7,14 @@ from Compiler import mpc_math
 execfile('/root/SCALE-MAMBA/Programs/ring/ring.mpc')
 execfile('/root/SCALE-MAMBA/Programs/lwe/lwe.mpc')
 
+        
+k = 19 # Size of committee (total protocol is k+1)
 
-k = 19
-
-l = 2048
-nBitsN = 11
+l = 10 # Message length
+nBitsN = 13
 N_ = 1 # Half-width of binomial distribution
 lgM = 15
+N = 8192 # Security parameter 
 
 # w is chosen so that w^n = -1 (mod p) 
 #   where p is the size of the prime field
@@ -22,44 +23,18 @@ r = Ring(nBitsN, w2048)
 
 lwe = LWE(r, N_, lgM, l) 
 
-B = 1
-
-N = l # Message length (and security parameter) 
-
 # Generating key pair (a,b) is public, s is secret
 [a, b, s] = lwe.key_gen()
-
-# Generate  random shares of SK and distribute among k committee parties!
-
-shares = Matrix(k, N, sint)
-sums = Array(N, sint(0))
-
-# Send an entire private list to a user
-def reveal_list(a, i):
-        for k in range(len(a)):
-                a[k].reveal_to(i)               
 
 # Reveal a public list to all
 def print_list(a):
         for k in range(len(a)):
                 print a[k]
 
-
-# k-1 values are random
-for i in range(0, k-1):
-        for j in range(N):
-                x = sint.get_random_int(B)
-                shares[i][j] = x
-                sums[j] += x
-                print_ln("P%d gets %s", shares[i][j].reveal_to(i))
-
 # Revealing public key to all
 print_list(a)
 print_list(b)
 
-# Last value ensures sum works out
-for j in range(N):
-        shares[k-1][j] = s[j] - sums[j]
-
-print_ln("P%d gets %s", shares[k-1][0].reveal_to(k-1))
-
+# Generating shares for secret key
+for i in range(N):
+        output_shares(0, s[i])
