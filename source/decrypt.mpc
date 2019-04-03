@@ -26,7 +26,7 @@ def norm(z):
 	mag = sint(0)
 	for i in range(len(z)):
 		mag += z[i]**2
-	return mag
+		return mag
 
 def encrypt(a, b, n):
 	[u, v] = lwe.enc(a,b,n)
@@ -41,16 +41,23 @@ def decrypt(enc_u, enc_v, s):
 # Returns message if sufficiently far from delta, otherwise returns null.
 def noiseDecryptAndThreshold(enc_u, enc_v, secret_key_shares, noise,  T, delta):
 
-	total_noise = Array(N, sint)
-	s = Array(N, sint)
+	#total_noise = Array(N, sint)
+	#s = Array(N, sint)
 
-	for i in range(0, k):
-		for j in range(N):
+	#for i in range(0, k):
+	#	for j in range(N):
 			# Reconstruct secret key
-			s[j] += secret_key_shares[i][j]
+	#		s[j] += secret_key_shares[i][j]
 			
 			# Take all users' noise and sum up homomorphically
-			total_noise[j] += noise[i][j]	
+	#		total_noise[j] += noise[i][j]
+			#use sint.get_random_bit()
+
+
+
+	s = sint.Array(N)
+	input_shares(0, *s)
+
 
 	z = decrypt(enc_u, enc_v, s)
 	mag = norm(z)
@@ -77,8 +84,18 @@ for i in range(k):
 
 
 # A provides encrypted aggregate data, threshold
-enc_u = [cint.public_input(k) for i in range(N)]
-enc_v = [cint.public_input(k) for i in range(N)]
+enc_u = cint.Array(N)
+enc_v = cint.Array(N)
+
+@for_range(N)
+def set_U(i):
+  enc_u[i] = cint.public_input(k)
+
+@for_range(N)
+def set_V(i):
+  enc_v[i] = cint.public_input(k)  
+
+
 T = sint.get_private_input_from(k)
 delta = sint.get_private_input_from(k)
 

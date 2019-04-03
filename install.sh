@@ -35,7 +35,7 @@ done
 # Set up SCALE-MAMBA
 cd /root/SCALE-MAMBA
 mv /root/config/genSetupOptions.sh .
-./genSetupOptions.sh 4 | ./Setup.x  # By default set-up with 4 players
+./genSetupOptions.sh 4 1 | ./Setup.x  # By default set-up with 4 players
 
 # copy examples to correct locations
 cd /root/SCALE-MAMBA
@@ -44,6 +44,13 @@ do
   mkdir Programs/$EX
   cp /root/source/$EX.mpc Programs/$EX/
 done 
+
+cd /root/config
+for x in chooseSubset.py renameShare.sh genSetupMSP.sh
+do 
+	mkdir config/
+	cp $x config/$x
+done
 
 # add simple syntax highlighting
 cd
