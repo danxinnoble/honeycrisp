@@ -59,3 +59,9 @@ mv config/mamba.vim .vim/syntax
 mkdir .vim/ftdetect
 cd .vim/ftdetect
 echo "au BufNewFile,BufRead *.wir set filetype=mamba" > mamba.vim
+
+# Compile necessary files
+cd /root/SCALE-MAMBA
+./compile.py Programs/decrypt
+./compile.py Programs/keygen
+echo "Compiled source files"
