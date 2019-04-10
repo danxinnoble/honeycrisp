@@ -14,6 +14,8 @@ seq ${N_1} > ./Data/evalPoints.txt
 
 ./genSetupOptions.sh ${N_1} ${THRESHOLD} | ./Setup.x > /dev/null
 
+
+# the 2 is the number of output shares
 echo 'Running part 1'
 ./benchmark.sh ./Programs/output_shares/ ${N_1} 2
 
