@@ -24,6 +24,7 @@ mv /root/source/benchmark.sh .
 mv /root/source/benchStart.sh .
 
 # Scripts to allow changes to sharing scheme
+mv /root/config/publicin.txt .
 mv /root/config/genSetupOptions.sh .
 mv /root/config/chooseSubset.py .
 mv /root/config/modifyEvalPoints.sh .
