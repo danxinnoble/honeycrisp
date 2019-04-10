@@ -21,6 +21,7 @@ mv /root/SMtweaks/ShareData.h ./src/LSSS/
 mv /root/SMtweaks/Setup.cpp ./src/
 
 mv /root/source/benchmark.sh .
+mv /root/source/benchStart.sh .
 
 # Scripts to allow changes to sharing scheme
 mv /root/config/genSetupOptions.sh .
@@ -28,6 +29,8 @@ mv /root/config/chooseSubset.py .
 mv /root/config/modifyEvalPoints.sh .
 mv /root/config/renameShares.sh .
 mv /root/test/testReconstruct.sh .
+mv /root/test/test0.sh .
+mv /root/test/test1.sh .
 
 make progs
 
