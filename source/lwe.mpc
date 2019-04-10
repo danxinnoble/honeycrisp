@@ -68,11 +68,12 @@ class LWE(object):
     clearM = cint(m)
     zNoisy = r.ringSub(v, r.ringMulFast(u, s))
     halfMthP = cint(-1)/(2*m)
-    z = []
-    for i in range(0, self.l):
+    z = sint.Array(self.l)
+    @for_range(self.l)
+    def round(i):
       zRangeI = zNoisy[i] + halfMthP
       zNotchesI = zRangeI * clearM
-      z.append(m - 1 - ((zNotchesI - 1) % m))
+      z[i] = m - 1 - ((zNotchesI - 1) % m)
 
     return z
 
