@@ -31,11 +31,6 @@ def decrypt(enc_u, enc_v, s):
 	return lwe.dec(enc_u, enc_v, s)
 
 	
-# Public key not needed??
-# a = [sint.get_private_input_from(k) for i in range(N)]
-# b = [sint.get_private_input_from(k) for i in range(N)]
-
-
 # A provides encrypted aggregate data, threshold
 enc_u = cint.Array(N)
 enc_v = cint.Array(N)

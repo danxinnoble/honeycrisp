@@ -10,7 +10,7 @@ execfile('/root/SCALE-MAMBA/Programs/lwe/lwe.mpc')
         
 k = 19 # Size of committee (total protocol is k+1)
 
-l = 10 # Message length
+l = 1 # Message length
 nBitsN = 13
 N_ = 1 # Half-width of binomial distribution
 lgM = 15
