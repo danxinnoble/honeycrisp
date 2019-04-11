@@ -1,3 +1,4 @@
+echo 'REMINDER: did you edit the decrypt source code for new # of parties?'
 N_1=$1
 N_2=$2  # where N_2 <= N1
 
