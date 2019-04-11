@@ -17,7 +17,7 @@ N_PLAYERS=$N_2
 ./genSetupOptions.sh ${N_2} ${THRESHOLD} | ./Setup.x > /dev/null
 
 
-perl -E 'print "1\n", "1\n", "1\n"' > Player$(($N_PLAYERS - 1))\_in.txt
+perl -E 'print "1\n", "1\n", "1\n"' > ./Data/Player$(($N_PLAYERS - 1))\_in.txt
 
 for i in `seq 8192`
 do 
