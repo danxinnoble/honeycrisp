@@ -14,8 +14,9 @@ lgM = 31
  
 # w is chosen so that w^n = -1 (mod p) 
 # where p is the size of the prime field
-w2048 = cint(1662636632232769309036)
-r = Ring(nBitsN, w2048)
+w = cint(216409912179401900965416891955038263635)**8
+
+r = Ring(nBitsN, w)
 
 lwe = LWE(r, N_, lgM, l) 
 

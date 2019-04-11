@@ -15,3 +15,4 @@ seq ${N_1} > ./Data/evalPoints.txt
 
 # the 2 is the number of output shares
 echo 'Running part 1'
+./benchmark.sh ./Programs/keygen/ ${N_1} 2

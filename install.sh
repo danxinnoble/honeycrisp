@@ -31,7 +31,7 @@ mv /root/config/modifyEvalPoints.sh .
 mv /root/config/renameShares.sh .
 mv /root/test/testReconstruct.sh .
 mv /root/test/test0.sh .
-mv /root/test/test1.sh .
+mv /root/test/testd.sh .
 
 make progs
 
