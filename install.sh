@@ -32,6 +32,8 @@ mv /root/config/renameShares.sh .
 mv /root/test/testReconstruct.sh .
 mv /root/test/test0.sh .
 mv /root/test/testd.sh .
+mv /root/test/hi.sh . 
+mv /root/test/incr.sh .
 
 make progs
 
@@ -90,6 +92,3 @@ echo "au BufNewFile,BufRead *.wir set filetype=mamba" > mamba.vim
 
 # Compile necessary files
 cd /root/SCALE-MAMBA
-./compile.py Programs/decrypt
-./compile.py Programs/keygen
-echo "Compiled source files"
