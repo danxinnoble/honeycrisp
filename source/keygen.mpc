@@ -14,7 +14,7 @@ l = 1 # Message length
 nBitsN = 13
 N_ = 1 # Half-width of binomial distribution
 lgM = 15
-N = 8192 # Security parameter 
+N = 4096 # Security parameter 
 
 # w is chosen so that w^n = -1 (mod p) 
 #   where p is the size of the prime field

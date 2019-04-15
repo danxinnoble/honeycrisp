@@ -1,3 +1,7 @@
+N_1=$1
+N_2=$2 
+THRESHOLD=$3
+
 python chooseSubset.py ${N_1} ${N_2} > ./Data/subset.txt
 echo 'Subset chosen:'
 cat ./Data/subset.txt

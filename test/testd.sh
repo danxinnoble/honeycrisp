@@ -19,7 +19,7 @@ N_PLAYERS=$N_2
 
 perl -E 'print "1\n", "1\n", "1\n"' > ./Data/Player$(($N_PLAYERS - 1))\_in.txt
 
-for i in `seq 8192`
+for i in `seq 4096`
 do 
   echo "1" >> publicin.txt
 done

@@ -21,7 +21,7 @@ r = Ring(nBitsN, w)
 lwe = LWE(r, N_, lgM, l) 
 
 # Length of messages
-N = 8192
+N = 4096
 
 def encrypt(a, b, n):
 	[u, v] = lwe.enc(a,b,n)
