@@ -21,7 +21,6 @@ mv /root/SMtweaks/ShareData.h ./src/LSSS/
 mv /root/SMtweaks/Setup.cpp ./src/
 
 mv /root/source/benchmark.sh .
-mv /root/source/benchStart.sh .
 
 # Scripts to allow changes to sharing scheme
 mv /root/config/publicin.txt .
