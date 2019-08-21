@@ -16,4 +16,7 @@ $ docker run -it --rm honeycrisp
 ```
 Please note that any changes you make in the container are not persistent.
 
+## Experiments
+
+Follow instructions in test/ec2.sh to run on an amazon EC2 instance - should be repeated on many machines to test full functionality
 

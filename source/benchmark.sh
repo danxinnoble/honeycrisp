@@ -6,6 +6,7 @@ N_IO=$3
 
 echo 'Compiling' $PROG_NAME
 reqs=$(./compile.py $PROG_NAME | grep "Program requires:")
+./compile.py Programs/decrypt # hack to compile decrypt for later
 
 echo $reqs
 
